@@ -35,6 +35,10 @@ public class RacaService {
 
     public Raca salvar(Raca raca) {
 
+        if (raca.getNome() != null) {
+            raca.setNome(raca.getNome().strip());
+        }
+
         Long especieId = raca.getEspecie().getId();
         Especie especie = especieService.buscarPorId(especieId);
 

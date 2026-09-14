@@ -242,6 +242,33 @@ class RacaServiceIT {
                 .isInstanceOf(RacaExistenteException.class);
     }
 
+    // HAPPY PATH: espaços no início/fim do nome devem ser removidos antes de salvar.
+    @Test
+    void salvar_comEspacosNasBordasDoNome_deveSalvarNomeSemEspacos() {
+        Especie especie = especieService.listar().get(0);
+        String nome = "Raça com espaços " + sufixoUnico();
+
+        Raca resultado = criarRaca("  " + nome + "  ", especie.getId());
+
+        assertThat(resultado.getNome()).isEqualTo(nome);
+    }
+
+    // UNHAPPY PATH: um nome que só difere por espaços nas bordas deve ser tratado
+    // como duplicado (ex.: "Yorkshire " e "Yorkshire").
+    @Test
+    void salvar_comNomeExistenteAcrescidoDeEspacos_deveLancarRacaExistenteException() {
+        Especie especie = especieService.listar().get(0);
+        Raca racaExistente = criarRaca("Raça duplicada " + sufixoUnico(), especie.getId());
+
+        Raca racaNova = Raca.builder()
+                .nome(" " + racaExistente.getNome() + "  ")
+                .especie(Especie.builder().id(especie.getId()).build())
+                .build();
+
+        assertThatThrownBy(() -> racaService.salvar(racaNova))
+                .isInstanceOf(RacaExistenteException.class);
+    }
+
     // HAPPY PATH: o mesmo nome de Raça pode ser cadastrado em Espécies diferentes,
     // já que a regra de duplicidade é escopada por (nome, espécie).
     @Test
