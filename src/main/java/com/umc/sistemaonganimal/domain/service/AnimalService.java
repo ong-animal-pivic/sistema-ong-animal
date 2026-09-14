@@ -11,10 +11,13 @@ import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class AnimalService {
+
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Autowired
     private AnimalRepository animalRepository;
@@ -40,6 +43,14 @@ public class AnimalService {
     }
 
     public Animal salvar(Animal animal) {
+
+        if (animal.getDataSaida() != null && animal.getDataResgate() != null
+                && animal.getDataSaida().isBefore(animal.getDataResgate())) {
+            throw new DomainException(String.format(
+                    "A data de saída (%s) não pode ser anterior à data de resgate (%s).",
+                    animal.getDataSaida().format(FORMATO_DATA),
+                    animal.getDataResgate().format(FORMATO_DATA)));
+        }
 
         Long racaId = animal.getRaca().getId();
         Raca raca = racaService.buscarPorId(racaId);

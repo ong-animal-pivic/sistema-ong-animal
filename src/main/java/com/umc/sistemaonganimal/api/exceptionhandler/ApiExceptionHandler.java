@@ -4,7 +4,9 @@ import com.umc.sistemaonganimal.domain.exception.DomainException;
 import com.umc.sistemaonganimal.domain.exception.EntityExistsException;
 import com.umc.sistemaonganimal.domain.exception.EntityInUseException;
 import com.umc.sistemaonganimal.domain.exception.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +50,26 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleDomainException(DomainException ex) {
         return createProblemDetail(HttpStatus.BAD_REQUEST, ex.getMessage(), "Violação de regra de negócio",
                 "https://pivic-ong/erro-domain");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        return createProblemDetail(HttpStatus.CONFLICT,
+                "Os dados informados violam uma regra de integridade do sistema. Verifique os valores e tente novamente.",
+                "Violação de integridade de dados",
+                "https://pivic-ong/erro-integridade");
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ProblemDetail problemDetail = createProblemDetail(status,
+                "O corpo da requisição é inválido. Verifique a sintaxe e os formatos dos campos (datas no formato yyyy-MM-dd).",
+                "Mensagem incompreensível",
+                "https://pivic-ong/mensagem-incompreensivel");
+
+        return handleExceptionInternal(ex, problemDetail, headers, status, request);
     }
 
     @SuppressWarnings("null")

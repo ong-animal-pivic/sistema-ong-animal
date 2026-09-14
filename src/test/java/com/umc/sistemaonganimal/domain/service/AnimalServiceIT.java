@@ -1,6 +1,7 @@
 package com.umc.sistemaonganimal.domain.service;
 
 import com.umc.sistemaonganimal.domain.exception.AnimalNotFoundException;
+import com.umc.sistemaonganimal.domain.exception.DomainException;
 import com.umc.sistemaonganimal.domain.model.Animal;
 import com.umc.sistemaonganimal.domain.model.Raca;
 import com.umc.sistemaonganimal.domain.model.Responsavel;
@@ -178,5 +179,55 @@ class AnimalServiceIT {
                 .extracting(Animal::getId)
                 .contains(animalMantido.getId())
                 .doesNotContain(animalExcluido.getId());
+    }
+
+    // Monta (sem salvar) um Animal válido com as datas informadas, para os testes
+    // da regra "data de saída não pode ser anterior à data de resgate".
+    private Animal montarAnimalComDatas(LocalDate dataResgate, LocalDate dataSaida) {
+        Raca racaExistente = racaService.listar().get(0);
+        Responsavel responsavelExistente = responsavelService.listar().get(0);
+
+        return Animal.builder()
+                .nome("Animal de teste")
+                .idadeMeses(1)
+                .porte(AnimalPorte.PEQUENO)
+                .sexo(AnimalSexo.MACHO)
+                .status(AnimalStatus.DISPONIVEL)
+                .castrado(true)
+                .dataResgate(dataResgate)
+                .dataSaida(dataSaida)
+                .raca(Raca.builder().id(racaExistente.getId()).build())
+                .responsavel(Responsavel.builder().id(responsavelExistente.getId()).build())
+                .build();
+    }
+
+    // UNHAPPY PATH: data de saída anterior à data de resgate deve ser barrada no
+    // service com DomainException e mensagem específica, em vez de estourar a
+    // constraint CHECK do banco (que resultaria em erro 500 genérico).
+    @Test
+    void salvar_comDataSaidaAnteriorAoResgate_deveLancarDomainException() {
+        LocalDate resgate = LocalDate.now().minusDays(1);
+        Animal animal = montarAnimalComDatas(resgate, resgate.minusDays(1));
+
+        assertThatThrownBy(() -> animalService.salvar(animal))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("não pode ser anterior à data de resgate");
+    }
+
+    // HAPPY PATH: saída no mesmo dia do resgate é permitida (regra é ">=").
+    @Test
+    void salvar_comDataSaidaIgualAoResgate_deveSalvar() {
+        LocalDate resgate = LocalDate.now();
+        Animal salvo = animalService.salvar(montarAnimalComDatas(resgate, resgate));
+
+        assertThat(salvo.getId()).isNotNull();
+    }
+
+    // HAPPY PATH: data de saída é opcional.
+    @Test
+    void salvar_semDataSaida_deveSalvar() {
+        Animal salvo = animalService.salvar(montarAnimalComDatas(LocalDate.now(), null));
+
+        assertThat(salvo.getId()).isNotNull();
     }
 }
