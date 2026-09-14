@@ -181,9 +181,10 @@ class AnimalServiceIT {
                 .doesNotContain(animalExcluido.getId());
     }
 
-    // Monta (sem salvar) um Animal válido com as datas informadas, para os testes
-    // da regra "data de saída não pode ser anterior à data de resgate".
-    private Animal montarAnimalComDatas(LocalDate dataResgate, LocalDate dataSaida) {
+    // Monta (sem salvar) um Animal válido com o status e as datas informados, para os
+    // testes das regras de data de saída. OBITO é usado quando há data de saída, pois
+    // ADOTADO exigiria também um adotante.
+    private Animal montarAnimalComDatas(AnimalStatus status, LocalDate dataResgate, LocalDate dataSaida) {
         Raca racaExistente = racaService.listar().get(0);
         Responsavel responsavelExistente = responsavelService.listar().get(0);
 
@@ -192,7 +193,7 @@ class AnimalServiceIT {
                 .idadeMeses(1)
                 .porte(AnimalPorte.PEQUENO)
                 .sexo(AnimalSexo.MACHO)
-                .status(AnimalStatus.DISPONIVEL)
+                .status(status)
                 .castrado(true)
                 .dataResgate(dataResgate)
                 .dataSaida(dataSaida)
@@ -207,7 +208,7 @@ class AnimalServiceIT {
     @Test
     void salvar_comDataSaidaAnteriorAoResgate_deveLancarDomainException() {
         LocalDate resgate = LocalDate.now().minusDays(1);
-        Animal animal = montarAnimalComDatas(resgate, resgate.minusDays(1));
+        Animal animal = montarAnimalComDatas(AnimalStatus.OBITO, resgate, resgate.minusDays(1));
 
         assertThatThrownBy(() -> animalService.salvar(animal))
                 .isInstanceOf(DomainException.class)
@@ -218,16 +219,47 @@ class AnimalServiceIT {
     @Test
     void salvar_comDataSaidaIgualAoResgate_deveSalvar() {
         LocalDate resgate = LocalDate.now();
-        Animal salvo = animalService.salvar(montarAnimalComDatas(resgate, resgate));
+        Animal salvo = animalService.salvar(montarAnimalComDatas(AnimalStatus.OBITO, resgate, resgate));
 
         assertThat(salvo.getId()).isNotNull();
     }
 
-    // HAPPY PATH: data de saída é opcional.
+    // HAPPY PATH: data de saída é opcional para status que não são de saída.
     @Test
-    void salvar_semDataSaida_deveSalvar() {
-        Animal salvo = animalService.salvar(montarAnimalComDatas(LocalDate.now(), null));
+    void salvar_disponivelSemDataSaida_deveSalvar() {
+        Animal salvo = animalService.salvar(
+                montarAnimalComDatas(AnimalStatus.DISPONIVEL, LocalDate.now(), null));
 
         assertThat(salvo.getId()).isNotNull();
+    }
+
+    // UNHAPPY PATH: status OBITO exige data de saída.
+    @Test
+    void salvar_obitoSemDataSaida_deveLancarDomainException() {
+        Animal animal = montarAnimalComDatas(AnimalStatus.OBITO, LocalDate.now(), null);
+
+        assertThatThrownBy(() -> animalService.salvar(animal))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("data de saída");
+    }
+
+    // UNHAPPY PATH: status ADOTADO exige data de saída (a regra é checada antes do adotante).
+    @Test
+    void salvar_adotadoSemDataSaida_deveLancarDomainException() {
+        Animal animal = montarAnimalComDatas(AnimalStatus.ADOTADO, LocalDate.now(), null);
+
+        assertThatThrownBy(() -> animalService.salvar(animal))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("data de saída");
+    }
+
+    // Consistência: status que não é de saída descarta a data de saída enviada.
+    @Test
+    void salvar_disponivelComDataSaida_deveDescartarDataSaida() {
+        LocalDate hoje = LocalDate.now();
+        Animal salvo = animalService.salvar(
+                montarAnimalComDatas(AnimalStatus.DISPONIVEL, hoje, hoje));
+
+        assertThat(salvo.getDataSaida()).isNull();
     }
 }

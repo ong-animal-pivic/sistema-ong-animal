@@ -44,6 +44,18 @@ public class AnimalService {
 
     public Animal salvar(Animal animal) {
 
+        boolean statusDeSaida = animal.getStatus() == AnimalStatus.ADOTADO
+                || animal.getStatus() == AnimalStatus.OBITO;
+        if (statusDeSaida) {
+            if (animal.getDataSaida() == null) {
+                throw new DomainException(
+                        "É obrigatório informar a data de saída quando o status do animal é ADOTADO ou OBITO.");
+            }
+        } else {
+            // Garante consistência: só animais adotados ou em óbito têm data de saída.
+            animal.setDataSaida(null);
+        }
+
         if (animal.getDataSaida() != null && animal.getDataResgate() != null
                 && animal.getDataSaida().isBefore(animal.getDataResgate())) {
             throw new DomainException(String.format(
