@@ -20,5 +20,10 @@ CREATE TABLE IF NOT EXISTS voluntario (
     complemento VARCHAR(50),
     responsavel_id INT NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    -- TODO: hoje a regra "responsavel_id deve apontar para um Responsavel do tipo ONG"
+    -- só é validada em VoluntarioService.salvar (Java). Considerar reforçar também a
+    -- nível de banco (ex.: trigger, já que um CHECK simples não alcança a coluna
+    -- responsavel.tipo_id em outra tabela) — decidir antes o comportamento desejado
+    -- para UPDATE do tipo de um Responsavel que já tenha voluntários vinculados.
     CONSTRAINT fk_voluntario_responsavel FOREIGN KEY (responsavel_id) REFERENCES responsavel(id)
 );

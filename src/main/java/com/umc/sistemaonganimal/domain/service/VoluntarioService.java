@@ -1,10 +1,12 @@
 package com.umc.sistemaonganimal.domain.service;
 
+import com.umc.sistemaonganimal.domain.exception.DomainException;
 import com.umc.sistemaonganimal.domain.exception.VoluntarioExistenteException;
 import com.umc.sistemaonganimal.domain.exception.VoluntarioNotFoundException;
 import com.umc.sistemaonganimal.domain.model.Responsavel;
 import com.umc.sistemaonganimal.domain.model.Voluntario;
 import com.umc.sistemaonganimal.domain.model.embeddables.Contato;
+import com.umc.sistemaonganimal.domain.model.enums.general.TipoResponsavel;
 import com.umc.sistemaonganimal.domain.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,11 @@ public class VoluntarioService {
 
     public Voluntario salvar(Voluntario voluntario) {
         Responsavel responsavel = responsavelService.buscarPorId(voluntario.getResponsavel().getId());
+
+        if (responsavel.getTipo() == null || responsavel.getTipo().getNome() != TipoResponsavel.ONG) {
+            throw new DomainException("O voluntário só pode ser vinculado a um responsável do tipo ONG.");
+        }
+
         voluntario.setResponsavel(responsavel);
 
         Contato contato = voluntario.getContato();

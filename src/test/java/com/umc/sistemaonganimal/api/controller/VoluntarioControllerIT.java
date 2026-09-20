@@ -4,7 +4,9 @@ import com.umc.sistemaonganimal.api.dto.embeddables.ContatoDTO;
 import com.umc.sistemaonganimal.api.dto.embeddables.DocumentoDTO;
 import com.umc.sistemaonganimal.api.dto.embeddables.EnderecoDTO;
 import com.umc.sistemaonganimal.api.dto.request.VoluntarioRequestDTO;
+import com.umc.sistemaonganimal.domain.model.Responsavel;
 import com.umc.sistemaonganimal.domain.model.enums.general.Frequencia;
+import com.umc.sistemaonganimal.domain.model.enums.general.TipoResponsavel;
 import com.umc.sistemaonganimal.domain.repository.ResponsavelRepository;
 import com.umc.sistemaonganimal.domain.repository.VoluntarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,8 +91,16 @@ class VoluntarioControllerIT {
                         .cep("01001000")
                         .numero("100")
                         .build())
-                .responsavelId(responsavelRepository.findAll().get(0).getId())
+                .responsavelId(buscarIdResponsavelPorTipo(TipoResponsavel.ONG))
                 .build();
+    }
+
+    private Long buscarIdResponsavelPorTipo(TipoResponsavel tipo) {
+        return responsavelRepository.findAll().stream()
+                .filter(r -> r.getTipo().getNome() == tipo)
+                .map(Responsavel::getId)
+                .findFirst()
+                .orElseThrow();
     }
 
     @Test
@@ -208,6 +218,21 @@ class VoluntarioControllerIT {
                 .then()
                 .statusCode(404)
                 .body("title", equalTo("Entidade não encontrada"));
+    }
+
+    @Test
+    void adicionar_comResponsavelNaoOng_deveRetornarBadRequest() {
+        VoluntarioRequestDTO payload = montarVoluntarioValido();
+        payload.setResponsavelId(buscarIdResponsavelPorTipo(TipoResponsavel.ABRIGO));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/voluntarios")
+                .then()
+                .statusCode(400)
+                .body("title", equalTo("Violação de regra de negócio"));
     }
 
     @Test

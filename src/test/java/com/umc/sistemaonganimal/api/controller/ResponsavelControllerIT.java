@@ -5,7 +5,9 @@ import com.umc.sistemaonganimal.api.dto.embeddables.DocumentoDTO;
 import com.umc.sistemaonganimal.api.dto.embeddables.EnderecoDTO;
 import com.umc.sistemaonganimal.api.dto.request.ResponsavelRequestDTO;
 import com.umc.sistemaonganimal.api.dto.request.VoluntarioRequestDTO;
+import com.umc.sistemaonganimal.domain.model.Tipo;
 import com.umc.sistemaonganimal.domain.model.enums.general.Frequencia;
+import com.umc.sistemaonganimal.domain.model.enums.general.TipoResponsavel;
 import com.umc.sistemaonganimal.domain.repository.ResponsavelRepository;
 import com.umc.sistemaonganimal.domain.repository.TipoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,8 +89,16 @@ class ResponsavelControllerIT {
                         .cep("01001000")
                         .numero("100")
                         .build())
-                .tipoId(tipoRepository.findAll().get(0).getId())
+                .tipoId(buscarIdTipo(TipoResponsavel.ONG))
                 .build();
+    }
+
+    private Long buscarIdTipo(TipoResponsavel nome) {
+        return tipoRepository.findAll().stream()
+                .filter(t -> t.getNome() == nome)
+                .map(Tipo::getId)
+                .findFirst()
+                .orElseThrow();
     }
 
     @Test

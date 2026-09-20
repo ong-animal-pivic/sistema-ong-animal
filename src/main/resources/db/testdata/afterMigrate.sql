@@ -92,6 +92,17 @@ VALUES
     ('ONG Amigos dos Bichos', '99887766000105', '2133332222', NULL, 'contato@amigosdosbichos.org', '@amigosdosbichos', 'Rua dos Amigos', 'Copacabana', 'Rio de Janeiro', 'RJ', '22020000', '75', NULL, 3),
     ('Abrigo Esperança Animal', '55443322000105', '4133221100', '4133221101', 'contato@esperancaanimal.org', NULL, 'Rua da Esperança', 'Água Verde', 'Curitiba', 'PR', '80240000', '300', NULL, 1);
 
+-- 4.1 Responsáveis do tipo ONG adicionais — voluntário só pode se vincular a um
+-- responsável do tipo ONG (ver VoluntarioService.salvar), então o fixture precisa
+-- de responsáveis ONG suficientes para manter a variedade de vínculos entre os
+-- voluntários semeados abaixo, sem reaproveitar sempre o mesmo responsável.
+INSERT INTO responsavel (nome, cnpj, telefone1, telefone2, email, instagram, logradouro, bairro, cidade, estado, cep, num_endereco, complemento, tipo_id)
+VALUES
+    ('ONG Focinho Feliz', '22555888000142', '1155556666', NULL, 'contato@focinhofeliz.org', '@focinhofeliz', 'Rua dos Focinhos', 'Moema', 'São Paulo', 'SP', '04077000', '120', NULL, 3),
+    ('ONG Patas Unidas', '33666999000123', '2144443333', '2144443334', 'contato@patasunidas.org', '@patasunidas', 'Rua da União', 'Botafogo', 'Rio de Janeiro', 'RJ', '22250000', '60', NULL, 3),
+    ('ONG Bicho Solidário', '44777000000104', '3122221111', NULL, 'contato@bichosolidario.org', NULL, 'Avenida Solidária', 'Funcionários', 'Belo Horizonte', 'MG', '30130000', '95', 'Sala 2', 3),
+    ('ONG Coração Animal', '55888111000185', '4133445566', NULL, 'contato@coracaoanimal.org', '@coracaoanimal', 'Rua do Coração', 'Batel', 'Curitiba', 'PR', '80420000', '210', NULL, 3);
+
 -- 5. Animais — cobrindo os 5 status, os dois sexos, os três portes,
 -- castrado/não castrado e vínculos com todos os responsáveis e parte dos adotantes.
 
@@ -138,12 +149,14 @@ VALUES
     ('Chiquinha', 9, 'FEMEA', 'PEQUENO', 'ADOTADO', TRUE, '2023-09-01', '2023-11-11', 6, 5, 1);
 
 -- 6. Voluntários — alternando CPF preenchido/ausente e e-mail preenchido/ausente,
--- cobrindo os 5 valores de Frequencia e vinculados a responsáveis variados.
+-- cobrindo os 5 valores de Frequencia e vinculados a diferentes responsáveis do
+-- tipo ONG (ids 5, 7, 9, 10, 11, 12 — voluntário só pode se vincular a um
+-- responsável do tipo ONG, ver VoluntarioService.salvar).
 INSERT INTO voluntario (nome, cpf, idade, profissao, telefone1, telefone2, email, instagram, frequencia, logradouro, bairro, cidade, estado, cep, num_endereco, complemento, responsavel_id)
 VALUES
-    ('Beatriz Andrade', '52998224725', 29, 'Veterinária', '11991112222', NULL, 'beatriz.andrade@email.com', '@biaandrade', 'SEMANAL', 'Rua dos Voluntários', 'Vila Nova', 'São Paulo', 'SP', '02002100', '75', NULL, 1),
-    ('Rafael Nunes', '11144477735', NULL, NULL, '11992223333', '1133445566', NULL, NULL, 'DIARIA', 'Rua das Acácias', 'Vila Mariana', 'São Paulo', 'SP', '04101100', '90', 'Fundos', 2),
-    ('Camila Rocha', NULL, 34, 'Estudante de Medicina Veterinária', '21993334444', NULL, 'camila.rocha@email.com', '@camilarocha', 'QUINZENAL', 'Rua das Palmeiras', 'Tijuca', 'Rio de Janeiro', 'RJ', '20520100', '18', NULL, 3),
-    ('Diego Martins', NULL, NULL, 'Autônomo', '31994445555', NULL, NULL, NULL, 'MENSAL', 'Rua dos Ipês', 'Savassi', 'Belo Horizonte', 'MG', '30140100', '415', NULL, 4),
-    ('Larissa Fontes', '98765432100', 22, 'Estudante', '11995556666', NULL, 'larissa.fontes@email.com', NULL, 'EVENTUAL', 'Avenida dos Animais', 'Jardim Esperança', 'São Paulo', 'SP', '03003100', '210', NULL, 5),
-    ('Thiago Barros', NULL, 41, 'Professor', '11996667777', '1133339999', 'thiago.barros@email.com', '@thiagobarros', 'SEMANAL', 'Estrada do Abrigo', 'Zona Rural', 'Cotia', 'SP', '06700100', '15', 'Km 5', 6);
+    ('Beatriz Andrade', '52998224725', 29, 'Veterinária', '11991112222', NULL, 'beatriz.andrade@email.com', '@biaandrade', 'SEMANAL', 'Rua dos Voluntários', 'Vila Nova', 'São Paulo', 'SP', '02002100', '75', NULL, 5),
+    ('Rafael Nunes', '11144477735', NULL, NULL, '11992223333', '1133445566', NULL, NULL, 'DIARIA', 'Rua das Acácias', 'Vila Mariana', 'São Paulo', 'SP', '04101100', '90', 'Fundos', 7),
+    ('Camila Rocha', NULL, 34, 'Estudante de Medicina Veterinária', '21993334444', NULL, 'camila.rocha@email.com', '@camilarocha', 'QUINZENAL', 'Rua das Palmeiras', 'Tijuca', 'Rio de Janeiro', 'RJ', '20520100', '18', NULL, 9),
+    ('Diego Martins', NULL, NULL, 'Autônomo', '31994445555', NULL, NULL, NULL, 'MENSAL', 'Rua dos Ipês', 'Savassi', 'Belo Horizonte', 'MG', '30140100', '415', NULL, 10),
+    ('Larissa Fontes', '98765432100', 22, 'Estudante', '11995556666', NULL, 'larissa.fontes@email.com', NULL, 'EVENTUAL', 'Avenida dos Animais', 'Jardim Esperança', 'São Paulo', 'SP', '03003100', '210', NULL, 11),
+    ('Thiago Barros', NULL, 41, 'Professor', '11996667777', '1133339999', 'thiago.barros@email.com', '@thiagobarros', 'SEMANAL', 'Estrada do Abrigo', 'Zona Rural', 'Cotia', 'SP', '06700100', '15', 'Km 5', 12);
