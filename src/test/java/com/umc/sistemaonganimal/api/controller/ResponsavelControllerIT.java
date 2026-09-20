@@ -49,6 +49,10 @@ class ResponsavelControllerIT {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
+        // Mesma convenção ISO-8601/UTC declarada explicitamente pelo servidor em
+        // application.properties (spring.jackson.time-zone=UTC, write-dates-as-timestamps=false;
+        // ver CLAUDE.md, seção "Data e hora"). Duplicada aqui porque o ObjectMapper do RestAssured
+        // simula um cliente HTTP externo e não herda a auto-configuração do Jackson do servidor.
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

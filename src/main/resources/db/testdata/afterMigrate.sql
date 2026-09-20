@@ -116,11 +116,10 @@ INSERT INTO animal (nome, idade_meses, sexo, porte, status, castrado, dt_resgate
 VALUES
     ('Fiona', 20, 'FEMEA', 'GRANDE', 'EM_TRATAMENTO', TRUE, '2024-08-01', 8, 'Tratamento de vermifugação em andamento', 7);
 
--- QUARENTENA
 INSERT INTO animal (nome, idade_meses, sexo, porte, status, castrado, dt_resgate, raca_id, observacao, responsavel_id)
 VALUES
-    ('Garfield', 72, 'MACHO', 'MEDIO', 'QUARENTENA', FALSE, CURRENT_DATE, 7, 'Aguardando exames iniciais', 1),
-    ('Toby', 10, 'MACHO', 'PEQUENO', 'QUARENTENA', FALSE, CURRENT_DATE - INTERVAL '3 days', 3, 'Recém-chegado, ainda em avaliação veterinária', 2);
+    ('Garfield', 72, 'MACHO', 'MEDIO', 'QUARENTENA', FALSE, '2025-09-19', 7, 'Aguardando exames iniciais', 1),
+    ('Toby', 10, 'MACHO', 'PEQUENO', 'QUARENTENA', FALSE, '2025-09-16', 3, 'Recém-chegado, ainda em avaliação veterinária', 2);
 
 -- OBITO
 INSERT INTO animal (nome, idade_meses, sexo, porte, status, castrado, dt_resgate, dt_saida, raca_id, observacao, responsavel_id)

@@ -67,8 +67,12 @@ class AdotanteControllerIT {
 
         // O ObjectMapper padrão do REST Assured não conhece java.time (LocalDate viraria um
         // array [ano, mes, dia] no JSON, que o servidor não sabe desserializar). Registramos
-        // o JavaTimeModule e desligamos a escrita de datas como timestamp, igual ao que o
-        // Spring Boot já faz automaticamente para o Jackson do próprio servidor.
+        // o JavaTimeModule e desligamos a escrita de datas como timestamp — a mesma convenção
+        // ISO-8601/UTC que o servidor agora declara explicitamente em application.properties
+        // (spring.jackson.time-zone=UTC, spring.jackson.serialization.write-dates-as-timestamps=
+        // false; ver CLAUDE.md, seção "Data e hora"). A duplicação aqui é intencional: o
+        // RestAssured simula um cliente HTTP externo, fora do container Spring, então não herda
+        // a auto-configuração do Jackson do servidor.
         // Importante: parte de RestAssured.config() (a config atual, já com o logConfig
         // ligado pela chamada acima) em vez de RestAssuredConfig.config() (que criaria uma
         // config nova em branco e apagaria o logConfig recém-configurado).
