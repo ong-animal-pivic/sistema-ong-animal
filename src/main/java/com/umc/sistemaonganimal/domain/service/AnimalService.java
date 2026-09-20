@@ -10,11 +10,13 @@ import com.umc.sistemaonganimal.domain.model.enums.animal.AnimalStatus;
 import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
+@Transactional
 public class AnimalService {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -31,10 +33,12 @@ public class AnimalService {
     @Autowired
     private ResponsavelService responsavelService;
 
+    @Transactional(readOnly = true)
     public List<Animal> listar() {
         return animalRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @SuppressWarnings("null")
     public Animal buscarPorId(Long id) {
         return animalRepository.findById(id)

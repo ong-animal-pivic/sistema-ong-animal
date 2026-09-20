@@ -13,10 +13,12 @@ import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
 import com.umc.sistemaonganimal.domain.repository.ResponsavelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class ResponsavelService {
 
     @Autowired
@@ -28,19 +30,23 @@ public class ResponsavelService {
     @Autowired
     private TipoService tipoService;
 
+    @Transactional(readOnly = true)
     public List<Responsavel> listar() {
         return responsavelRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @SuppressWarnings("null")
     public Responsavel buscarPorId(Long id) {
         return responsavelRepository.findById(id).orElseThrow(() -> new ResponsavelNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
     public List<Animal> listarAnimaisVinculados(Long responsavelId) {
         return animalRepository.findByResponsavelId(responsavelId);
     }
 
+    @Transactional(readOnly = true)
     public long contarAnimaisVinculados(Long responsavelId) {
         return animalRepository.countByResponsavelId(responsavelId);
     }

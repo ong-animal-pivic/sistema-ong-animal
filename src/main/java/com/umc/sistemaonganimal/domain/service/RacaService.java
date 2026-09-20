@@ -9,10 +9,12 @@ import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
 import com.umc.sistemaonganimal.domain.repository.RacaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class RacaService {
 
     @Autowired
@@ -24,10 +26,12 @@ public class RacaService {
     @Autowired
     private AnimalRepository animalRepository;
 
+    @Transactional(readOnly = true)
     public List<Raca> listar() {
         return racaRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @SuppressWarnings("null")
     public Raca buscarPorId(Long id) {
         return racaRepository.findById(id).orElseThrow(() -> new RacaNotFoundException(id));

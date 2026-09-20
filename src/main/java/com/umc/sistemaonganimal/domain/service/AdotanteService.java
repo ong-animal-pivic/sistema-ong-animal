@@ -10,10 +10,12 @@ import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class AdotanteService {
 
     @Autowired
@@ -22,10 +24,12 @@ public class AdotanteService {
     @Autowired
     private AnimalRepository animalRepository;
 
+    @Transactional(readOnly = true)
     public List<Adotante> listar() {
         return adotanteRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @SuppressWarnings("null")
     public Adotante buscarPorId(Long id) {
         return adotanteRepository.findById(id).orElseThrow(() -> new AdotanteNotFoundException(id));
