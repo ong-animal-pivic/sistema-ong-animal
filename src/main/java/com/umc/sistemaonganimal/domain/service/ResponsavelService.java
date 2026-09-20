@@ -11,6 +11,7 @@ import com.umc.sistemaonganimal.domain.model.embeddables.Contato;
 import com.umc.sistemaonganimal.domain.model.embeddables.Documento;
 import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
 import com.umc.sistemaonganimal.domain.repository.ResponsavelRepository;
+import com.umc.sistemaonganimal.domain.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,9 @@ public class ResponsavelService {
 
     @Autowired
     private AnimalRepository animalRepository;
+
+    @Autowired
+    private VoluntarioRepository voluntarioRepository;
 
     @Autowired
     private TipoService tipoService;
@@ -90,8 +94,9 @@ public class ResponsavelService {
             throw new ResponsavelInUseException(id);
         }
 
-        // TODO: bloquear exclusão também se o responsável estiver vinculado a um Voluntário,
-        // quando essa entidade existir no domínio (não existe hoje no projeto).
+        if (voluntarioRepository.existsByResponsavelId(id)) {
+            throw new ResponsavelInUseException(id);
+        }
 
         responsavel.setAtivo(false);
         responsavelRepository.save(responsavel);

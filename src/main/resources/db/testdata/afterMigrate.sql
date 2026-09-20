@@ -1,5 +1,6 @@
 TRUNCATE
     animal,
+    voluntario,
     adotante,
     especie,
     raca,
@@ -135,3 +136,14 @@ VALUES
     ('Amora', 22, 'FEMEA', 'MEDIO', 'ADOTADO', TRUE, '2023-05-05', '2023-09-01', 1, 3, 1),
     ('Duque', 40, 'MACHO', 'GRANDE', 'ADOTADO', TRUE, '2023-03-10', '2023-07-19', 2, 4, 6),
     ('Chiquinha', 9, 'FEMEA', 'PEQUENO', 'ADOTADO', TRUE, '2023-09-01', '2023-11-11', 6, 5, 1);
+
+-- 6. Voluntários — alternando CPF preenchido/ausente e e-mail preenchido/ausente,
+-- cobrindo os 5 valores de Frequencia e vinculados a responsáveis variados.
+INSERT INTO voluntario (nome, cpf, idade, profissao, telefone1, telefone2, email, instagram, frequencia, logradouro, bairro, cidade, estado, cep, num_endereco, complemento, responsavel_id)
+VALUES
+    ('Beatriz Andrade', '52998224725', 29, 'Veterinária', '11991112222', NULL, 'beatriz.andrade@email.com', '@biaandrade', 'SEMANAL', 'Rua dos Voluntários', 'Vila Nova', 'São Paulo', 'SP', '02002100', '75', NULL, 1),
+    ('Rafael Nunes', '11144477735', NULL, NULL, '11992223333', '1133445566', NULL, NULL, 'DIARIA', 'Rua das Acácias', 'Vila Mariana', 'São Paulo', 'SP', '04101100', '90', 'Fundos', 2),
+    ('Camila Rocha', NULL, 34, 'Estudante de Medicina Veterinária', '21993334444', NULL, 'camila.rocha@email.com', '@camilarocha', 'QUINZENAL', 'Rua das Palmeiras', 'Tijuca', 'Rio de Janeiro', 'RJ', '20520100', '18', NULL, 3),
+    ('Diego Martins', NULL, NULL, 'Autônomo', '31994445555', NULL, NULL, NULL, 'MENSAL', 'Rua dos Ipês', 'Savassi', 'Belo Horizonte', 'MG', '30140100', '415', NULL, 4),
+    ('Larissa Fontes', '98765432100', 22, 'Estudante', '11995556666', NULL, 'larissa.fontes@email.com', NULL, 'EVENTUAL', 'Avenida dos Animais', 'Jardim Esperança', 'São Paulo', 'SP', '03003100', '210', NULL, 5),
+    ('Thiago Barros', NULL, 41, 'Professor', '11996667777', '1133339999', 'thiago.barros@email.com', '@thiagobarros', 'SEMANAL', 'Estrada do Abrigo', 'Zona Rural', 'Cotia', 'SP', '06700100', '15', 'Km 5', 6);

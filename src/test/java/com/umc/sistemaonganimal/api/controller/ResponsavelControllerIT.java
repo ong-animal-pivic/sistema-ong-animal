@@ -4,6 +4,8 @@ import com.umc.sistemaonganimal.api.dto.embeddables.ContatoDTO;
 import com.umc.sistemaonganimal.api.dto.embeddables.DocumentoDTO;
 import com.umc.sistemaonganimal.api.dto.embeddables.EnderecoDTO;
 import com.umc.sistemaonganimal.api.dto.request.ResponsavelRequestDTO;
+import com.umc.sistemaonganimal.api.dto.request.VoluntarioRequestDTO;
+import com.umc.sistemaonganimal.domain.model.enums.general.Frequencia;
 import com.umc.sistemaonganimal.domain.repository.ResponsavelRepository;
 import com.umc.sistemaonganimal.domain.repository.TipoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -221,6 +223,49 @@ class ResponsavelControllerIT {
                 .then()
                 .statusCode(400)
                 .body("detalhes.nome", notNullValue());
+    }
+
+    @Test
+    void excluir_comResponsavelVinculadoAVoluntario_deveRetornarConflict() {
+        Long responsavelId = criarResponsavelViaApi();
+        responsavelIdCriado = responsavelId;
+
+        VoluntarioRequestDTO voluntarioDTO = VoluntarioRequestDTO.builder()
+                .nome("Voluntário vinculado")
+                .contato(ContatoDTO.builder()
+                        .telefonePrincipal("11999990005")
+                        .build())
+                .frequencia(Frequencia.MENSAL)
+                .endereco(EnderecoDTO.builder()
+                        .logradouro("Rua do Voluntariado")
+                        .bairro("Bairro API")
+                        .cidade("Cidade API")
+                        .estado("SP")
+                        .cep("01001000")
+                        .numero("100")
+                        .build())
+                .responsavelId(responsavelId)
+                .build();
+
+        Long voluntarioId = given()
+                .contentType(ContentType.JSON)
+                .body(voluntarioDTO)
+                .when()
+                .post("/voluntarios")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
+
+        try {
+            given()
+                    .when()
+                    .delete("/responsaveis/{id}", responsavelId)
+                    .then()
+                    .statusCode(409)
+                    .body("title", equalTo("Entidade em uso"));
+        } finally {
+            jdbcTemplate.update("DELETE FROM voluntario WHERE id = ?", voluntarioId);
+        }
     }
 
     private Long criarResponsavelViaApi() {
