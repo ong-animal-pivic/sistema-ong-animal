@@ -1,5 +1,7 @@
 TRUNCATE
     animal,
+    area_voluntario,
+    area,
     voluntario,
     adotante,
     especie,
@@ -160,3 +162,18 @@ VALUES
     ('Diego Martins', NULL, NULL, 'Autônomo', '31994445555', NULL, NULL, NULL, 'MENSAL', 'Rua dos Ipês', 'Savassi', 'Belo Horizonte', 'MG', '30140100', '415', NULL, 10),
     ('Larissa Fontes', '98765432100', 22, 'Estudante', '11995556666', NULL, 'larissa.fontes@email.com', NULL, 'EVENTUAL', 'Avenida dos Animais', 'Jardim Esperança', 'São Paulo', 'SP', '03003100', '210', NULL, 11),
     ('Thiago Barros', NULL, 41, 'Professor', '11996667777', '1133339999', 'thiago.barros@email.com', '@thiagobarros', 'SEMANAL', 'Estrada do Abrigo', 'Zona Rural', 'Cotia', 'SP', '06700100', '15', 'Km 5', 12);
+
+-- 7. Áreas — algumas áreas de atuação da ONG, com vínculos parciais aos
+-- voluntários semeados na seção 6 (nem todo voluntário está vinculado a uma
+-- área, e a área "Administrativo" fica propositalmente sem voluntário, para
+-- cobrir o cenário de exclusão sem bloqueio por vínculo).
+INSERT INTO area (nome, descricao, observacao) VALUES
+    ('Resgate', 'Resgate de animais em situação de risco', NULL),                                                  -- ID 1
+    ('Adoção', 'Triagem e acompanhamento de processos de adoção', 'Requer disponibilidade aos finais de semana'), -- ID 2
+    ('Eventos', 'Organização de feiras de adoção e campanhas', NULL),                                              -- ID 3
+    ('Administrativo', NULL, NULL);                                                                                -- ID 4 (sem voluntário vinculado)
+
+INSERT INTO area_voluntario (area_id, voluntario_id) VALUES
+    (1, 1), (1, 2),
+    (2, 3),
+    (3, 4), (3, 5), (3, 6);

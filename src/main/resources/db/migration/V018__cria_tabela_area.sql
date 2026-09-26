@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS area (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255),
+    observacao VARCHAR(255),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE
+);
