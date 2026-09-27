@@ -1,5 +1,7 @@
 TRUNCATE
     animal,
+    voluntario_disponibilidade,
+    disponibilidade,
     area_voluntario,
     area,
     voluntario,
@@ -177,3 +179,25 @@ INSERT INTO area_voluntario (area_id, voluntario_id) VALUES
     (1, 1), (1, 2),
     (2, 3),
     (3, 4), (3, 5), (3, 6);
+
+-- 8. Disponibilidades — catálogo com as 21 combinações de dia da semana x turno
+-- (a migration não faz INSERT; em produção, DisponibilidadeService.adicionar cria
+-- a combinação sob demanda). IDs: (dia - 1) * 3 + turno, com SEGUNDA=1 e MANHA=1.
+INSERT INTO disponibilidade (dia_semana, turno) VALUES
+    ('SEGUNDA', 'MANHA'), ('SEGUNDA', 'TARDE'), ('SEGUNDA', 'NOITE'), -- IDs 1-3
+    ('TERCA', 'MANHA'),   ('TERCA', 'TARDE'),   ('TERCA', 'NOITE'),   -- IDs 4-6
+    ('QUARTA', 'MANHA'),  ('QUARTA', 'TARDE'),  ('QUARTA', 'NOITE'),  -- IDs 7-9
+    ('QUINTA', 'MANHA'),  ('QUINTA', 'TARDE'),  ('QUINTA', 'NOITE'),  -- IDs 10-12
+    ('SEXTA', 'MANHA'),   ('SEXTA', 'TARDE'),   ('SEXTA', 'NOITE'),   -- IDs 13-15
+    ('SABADO', 'MANHA'),  ('SABADO', 'TARDE'),  ('SABADO', 'NOITE'),  -- IDs 16-18
+    ('DOMINGO', 'MANHA'), ('DOMINGO', 'TARDE'), ('DOMINGO', 'NOITE'); -- IDs 19-21
+
+-- Vínculos parciais: voluntários 1 e 3 compartilham SÁBADO/MANHÃ (mesma combinação
+-- em voluntários diferentes é permitida), e o voluntário 6 fica sem disponibilidade.
+INSERT INTO voluntario_disponibilidade (voluntario_id, disponibilidade_id, observacao) VALUES
+    (1, 16, 'Prefere atuar em feiras de adoção'),
+    (1, 4, NULL),
+    (2, 1, NULL), (2, 2, NULL), (2, 3, 'Pode estender até as 22h'),
+    (3, 16, NULL),
+    (4, 20, NULL),
+    (5, 9, 'Somente quinzenalmente');
