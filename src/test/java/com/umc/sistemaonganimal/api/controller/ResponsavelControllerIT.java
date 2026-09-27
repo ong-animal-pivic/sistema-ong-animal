@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -126,7 +127,8 @@ class ResponsavelControllerIT {
                 .then()
                 .statusCode(200)
                 .body("id", equalTo(responsavelIdCriado.intValue()))
-                .body("nome", equalTo("Responsável via API"));
+                .body("nome", equalTo("Responsável via API"))
+                .body("voluntariosVinculados", hasSize(0));
     }
 
     @Test
@@ -240,6 +242,42 @@ class ResponsavelControllerIT {
         Long responsavelId = criarResponsavelViaApi();
         responsavelIdCriado = responsavelId;
 
+        Long voluntarioId = criarVoluntarioViaApi(responsavelId);
+
+        try {
+            given()
+                    .when()
+                    .delete("/responsaveis/{id}", responsavelId)
+                    .then()
+                    .statusCode(409)
+                    .body("title", equalTo("Entidade em uso"));
+        } finally {
+            jdbcTemplate.update("DELETE FROM voluntario WHERE id = ?", voluntarioId);
+        }
+    }
+
+    @Test
+    void buscar_comVoluntarioVinculado_deveRetornarVoluntariosVinculados() {
+        Long responsavelId = criarResponsavelViaApi();
+        responsavelIdCriado = responsavelId;
+
+        Long voluntarioId = criarVoluntarioViaApi(responsavelId);
+
+        try {
+            given()
+                    .when()
+                    .get("/responsaveis/{id}", responsavelId)
+                    .then()
+                    .statusCode(200)
+                    .body("voluntariosVinculados", hasSize(1))
+                    .body("voluntariosVinculados[0].id", equalTo(voluntarioId.intValue()))
+                    .body("voluntariosVinculados[0].nome", equalTo("Voluntário vinculado"));
+        } finally {
+            jdbcTemplate.update("DELETE FROM voluntario WHERE id = ?", voluntarioId);
+        }
+    }
+
+    private Long criarVoluntarioViaApi(Long responsavelId) {
         VoluntarioRequestDTO voluntarioDTO = VoluntarioRequestDTO.builder()
                 .nome("Voluntário vinculado")
                 .contato(ContatoDTO.builder()
@@ -257,7 +295,7 @@ class ResponsavelControllerIT {
                 .responsavelId(responsavelId)
                 .build();
 
-        Long voluntarioId = given()
+        return given()
                 .contentType(ContentType.JSON)
                 .body(voluntarioDTO)
                 .when()
@@ -265,17 +303,6 @@ class ResponsavelControllerIT {
                 .then()
                 .statusCode(201)
                 .extract().jsonPath().getLong("id");
-
-        try {
-            given()
-                    .when()
-                    .delete("/responsaveis/{id}", responsavelId)
-                    .then()
-                    .statusCode(409)
-                    .body("title", equalTo("Entidade em uso"));
-        } finally {
-            jdbcTemplate.update("DELETE FROM voluntario WHERE id = ?", voluntarioId);
-        }
     }
 
     private Long criarResponsavelViaApi() {

@@ -5,6 +5,7 @@ import com.umc.sistemaonganimal.api.dto.embeddables.DocumentoDTO;
 import com.umc.sistemaonganimal.api.dto.embeddables.EnderecoDTO;
 import com.umc.sistemaonganimal.domain.model.Animal;
 import com.umc.sistemaonganimal.domain.model.Responsavel;
+import com.umc.sistemaonganimal.domain.model.Voluntario;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +39,8 @@ public class ResponsavelResponseDTO {
 
     private List<AnimalResponseDTO> animaisVinculados;
 
+    private List<VoluntarioResponseDTO> voluntariosVinculados;
+
     // qtdAnimais fica null aqui para evitar uma query de contagem extra por registro aninhado (ex.: dentro de AnimalResponseDTO)
     public static ResponsavelResponseDTO fromEntity(Responsavel responsavel) {
         return fromEntity(responsavel, null, null);
@@ -48,6 +51,11 @@ public class ResponsavelResponseDTO {
     }
 
     public static ResponsavelResponseDTO fromEntity(Responsavel responsavel, Long qtdAnimais, List<Animal> animaisVinculados) {
+        return fromEntity(responsavel, qtdAnimais, animaisVinculados, null);
+    }
+
+    public static ResponsavelResponseDTO fromEntity(Responsavel responsavel, Long qtdAnimais,
+                                                    List<Animal> animaisVinculados, List<Voluntario> voluntariosVinculados) {
         if (responsavel == null) {
             return null;
         }
@@ -62,6 +70,9 @@ public class ResponsavelResponseDTO {
                 .tipo(TipoResponseDTO.fromEntity(responsavel.getTipo()))
                 .animaisVinculados(animaisVinculados != null
                         ? animaisVinculados.stream().map(AnimalResponseDTO::fromEntity).toList()
+                        : null)
+                .voluntariosVinculados(voluntariosVinculados != null
+                        ? voluntariosVinculados.stream().map(VoluntarioResponseDTO::fromEntity).toList()
                         : null)
                 .build();
     }

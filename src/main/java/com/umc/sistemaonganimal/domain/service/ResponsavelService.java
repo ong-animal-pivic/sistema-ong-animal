@@ -7,6 +7,7 @@ import com.umc.sistemaonganimal.domain.exception.ResponsavelNotFoundException;
 import com.umc.sistemaonganimal.domain.model.Animal;
 import com.umc.sistemaonganimal.domain.model.Responsavel;
 import com.umc.sistemaonganimal.domain.model.Tipo;
+import com.umc.sistemaonganimal.domain.model.Voluntario;
 import com.umc.sistemaonganimal.domain.model.embeddables.Contato;
 import com.umc.sistemaonganimal.domain.model.embeddables.Documento;
 import com.umc.sistemaonganimal.domain.repository.AnimalRepository;
@@ -48,6 +49,11 @@ public class ResponsavelService {
     @Transactional(readOnly = true)
     public List<Animal> listarAnimaisVinculados(Long responsavelId) {
         return animalRepository.findByResponsavelId(responsavelId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Voluntario> listarVoluntariosVinculados(Long responsavelId) {
+        return voluntarioRepository.findByResponsavelId(responsavelId);
     }
 
     @Transactional(readOnly = true)

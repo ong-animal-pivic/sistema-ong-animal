@@ -5,6 +5,7 @@ import com.umc.sistemaonganimal.api.dto.response.ResponsavelResponseDTO;
 import com.umc.sistemaonganimal.domain.model.Animal;
 import com.umc.sistemaonganimal.domain.model.Responsavel;
 import com.umc.sistemaonganimal.domain.model.Tipo;
+import com.umc.sistemaonganimal.domain.model.Voluntario;
 import com.umc.sistemaonganimal.domain.service.ResponsavelService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,9 @@ public class ResponsavelController {
     public ResponsavelResponseDTO buscar(@PathVariable Long responsavelId) {
         Responsavel responsavel = responsavelService.buscarPorId(responsavelId);
         List<Animal> animaisVinculados = responsavelService.listarAnimaisVinculados(responsavelId);
-        return ResponsavelResponseDTO.fromEntity(responsavel, (long) animaisVinculados.size(), animaisVinculados);
+        List<Voluntario> voluntariosVinculados = responsavelService.listarVoluntariosVinculados(responsavelId);
+        return ResponsavelResponseDTO.fromEntity(
+                responsavel, (long) animaisVinculados.size(), animaisVinculados, voluntariosVinculados);
     }
 
     @PostMapping
