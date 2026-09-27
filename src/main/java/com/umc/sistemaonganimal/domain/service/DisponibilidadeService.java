@@ -63,12 +63,21 @@ public class DisponibilidadeService {
                 .build());
     }
 
+    public VoluntarioDisponibilidade atualizarObservacao(Long voluntarioId, Long disponibilidadeId, String observacao) {
+        VoluntarioDisponibilidade vinculo = buscarVinculo(voluntarioId, disponibilidadeId);
+
+        vinculo.setObservacao(observacao == null || observacao.isBlank() ? null : observacao.trim());
+        return voluntarioDisponibilidadeRepository.save(vinculo);
+    }
+
     public void remover(Long voluntarioId, Long disponibilidadeId) {
-        VoluntarioDisponibilidade vinculo = voluntarioDisponibilidadeRepository
+        voluntarioDisponibilidadeRepository.delete(buscarVinculo(voluntarioId, disponibilidadeId));
+    }
+
+    private VoluntarioDisponibilidade buscarVinculo(Long voluntarioId, Long disponibilidadeId) {
+        return voluntarioDisponibilidadeRepository
                 .findByVoluntarioIdAndDisponibilidadeId(voluntarioId, disponibilidadeId)
                 .orElseThrow(() -> new DisponibilidadeNotFoundException(voluntarioId, disponibilidadeId));
-
-        voluntarioDisponibilidadeRepository.delete(vinculo);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.umc.sistemaonganimal.api.controller;
 
+import com.umc.sistemaonganimal.api.dto.request.DisponibilidadeObservacaoRequestDTO;
 import com.umc.sistemaonganimal.api.dto.request.DisponibilidadeRequestDTO;
 import com.umc.sistemaonganimal.api.dto.response.DisponibilidadeResponseDTO;
 import com.umc.sistemaonganimal.domain.model.VoluntarioDisponibilidade;
@@ -35,6 +36,15 @@ public class VoluntarioDisponibilidadeController {
                 disponibilidadeDTO.getDiaSemana(),
                 disponibilidadeDTO.getTurno(),
                 disponibilidadeDTO.getObservacao());
+        return DisponibilidadeResponseDTO.fromEntity(vinculo);
+    }
+
+    @PutMapping("/{disponibilidadeId}")
+    public DisponibilidadeResponseDTO atualizarObservacao(@PathVariable Long voluntarioId,
+                                                          @PathVariable Long disponibilidadeId,
+                                                          @RequestBody @Valid DisponibilidadeObservacaoRequestDTO observacaoDTO) {
+        VoluntarioDisponibilidade vinculo = disponibilidadeService.atualizarObservacao(
+                voluntarioId, disponibilidadeId, observacaoDTO.getObservacao());
         return DisponibilidadeResponseDTO.fromEntity(vinculo);
     }
 

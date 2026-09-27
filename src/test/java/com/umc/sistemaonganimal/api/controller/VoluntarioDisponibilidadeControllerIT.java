@@ -1,5 +1,6 @@
 package com.umc.sistemaonganimal.api.controller;
 
+import com.umc.sistemaonganimal.api.dto.request.DisponibilidadeObservacaoRequestDTO;
 import com.umc.sistemaonganimal.api.dto.request.DisponibilidadeRequestDTO;
 import com.umc.sistemaonganimal.domain.model.Responsavel;
 import com.umc.sistemaonganimal.domain.model.enums.general.DiaSemana;
@@ -284,6 +285,94 @@ class VoluntarioDisponibilidadeControllerIT {
                 .body(montarDisponibilidade(DiaSemana.SEGUNDA, Turno.MANHA))
                 .when()
                 .post("/voluntarios/{voluntarioId}/disponibilidades", idInexistenteDeVoluntario())
+                .then()
+                .statusCode(404)
+                .body("title", equalTo("Entidade não encontrada"));
+    }
+
+    @Test
+    void atualizarObservacao_vinculoExistente_deveRetornarOkEAparecerNaListagem() {
+        long voluntarioId = criarVoluntario();
+        DisponibilidadeRequestDTO payload = montarDisponibilidade(DiaSemana.SEGUNDA, Turno.TARDE);
+        payload.setObservacao(null);
+        long disponibilidadeId = adicionarViaApi(voluntarioId, payload);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("observacao", "  Só a partir das 15h  "))
+                .when()
+                .put("/voluntarios/{voluntarioId}/disponibilidades/{disponibilidadeId}", voluntarioId, disponibilidadeId)
+                .then()
+                .statusCode(200)
+                .body("id", equalTo((int) disponibilidadeId))
+                .body("diaSemana", equalTo("SEGUNDA"))
+                .body("turno", equalTo("TARDE"))
+                .body("observacao", equalTo("Só a partir das 15h"));
+
+        given()
+                .when()
+                .get("/voluntarios/{voluntarioId}/disponibilidades", voluntarioId)
+                .then()
+                .statusCode(200)
+                .body("observacao", contains("Só a partir das 15h"));
+    }
+
+    @Test
+    void atualizarObservacao_comObservacaoNula_deveApagar() {
+        long voluntarioId = criarVoluntario();
+        long disponibilidadeId = adicionarViaApi(voluntarioId, montarDisponibilidade(DiaSemana.SEXTA, Turno.NOITE));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(DisponibilidadeObservacaoRequestDTO.builder().observacao(null).build())
+                .when()
+                .put("/voluntarios/{voluntarioId}/disponibilidades/{disponibilidadeId}", voluntarioId, disponibilidadeId)
+                .then()
+                .statusCode(200)
+                .body("observacao", nullValue());
+    }
+
+    @Test
+    void atualizarObservacao_emBranco_deveApagar() {
+        long voluntarioId = criarVoluntario();
+        long disponibilidadeId = adicionarViaApi(voluntarioId, montarDisponibilidade(DiaSemana.QUINTA, Turno.NOITE));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("observacao", "   "))
+                .when()
+                .put("/voluntarios/{voluntarioId}/disponibilidades/{disponibilidadeId}", voluntarioId, disponibilidadeId)
+                .then()
+                .statusCode(200)
+                .body("observacao", nullValue());
+    }
+
+    @Test
+    void atualizarObservacao_acimaDe255Caracteres_deveRetornarBadRequestComDetalhes() {
+        long voluntarioId = criarVoluntario();
+        long disponibilidadeId = adicionarViaApi(voluntarioId, montarDisponibilidade(DiaSemana.SABADO, Turno.MANHA));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("observacao", "a".repeat(256)))
+                .when()
+                .put("/voluntarios/{voluntarioId}/disponibilidades/{disponibilidadeId}", voluntarioId, disponibilidadeId)
+                .then()
+                .statusCode(400)
+                .body("detalhes.observacao", notNullValue());
+    }
+
+    @Test
+    void atualizarObservacao_vinculoInexistente_deveRetornarNotFound() {
+        long voluntarioId = criarVoluntario();
+        long outroVoluntario = criarVoluntario();
+        long disponibilidadeId = adicionarViaApi(outroVoluntario, montarDisponibilidade(DiaSemana.DOMINGO, Turno.MANHA));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("observacao", "Não deve salvar"))
+                .when()
+                .put("/voluntarios/{voluntarioId}/disponibilidades/{disponibilidadeId}", voluntarioId, disponibilidadeId)
                 .then()
                 .statusCode(404)
                 .body("title", equalTo("Entidade não encontrada"));
